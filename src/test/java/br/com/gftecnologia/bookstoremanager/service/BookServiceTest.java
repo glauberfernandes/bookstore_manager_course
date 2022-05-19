@@ -2,6 +2,7 @@ package br.com.gftecnologia.bookstoremanager.service;
 
 import br.com.gftecnologia.bookstoremanager.dto.BookDTO;
 import br.com.gftecnologia.bookstoremanager.entity.Book;
+import br.com.gftecnologia.bookstoremanager.exception.BookNotFoundException;
 import br.com.gftecnologia.bookstoremanager.repository.BookRepository;
 import br.com.gftecnologia.bookstoremanager.utils.BookUtils;
 import org.junit.jupiter.api.Assertions;
@@ -28,7 +29,7 @@ public class BookServiceTest {
     private BookService bookService;
 
     @Test
-    void whenGivenExistingIdThenReturnThisBook() {
+    void whenGivenExistingIdThenReturnThisBook() throws BookNotFoundException {
         Book expectedFoundBook = createFakeBook();
 
         when(bookRepository.findById(expectedFoundBook.getId())).thenReturn(Optional.of(expectedFoundBook));
@@ -38,5 +39,14 @@ public class BookServiceTest {
         assertEquals(expectedFoundBook.getName(), bookDTO.getName());
         assertEquals(expectedFoundBook.getIsbn(), bookDTO.getIsbn());
         assertEquals(expectedFoundBook.getPublisherName(), bookDTO.getPublisherName());
+    }
+
+    @Test
+    void whenGivenUnexistingIdThenNotFindThrowAnException() {
+        var invalidId = 10L;
+
+        when(bookRepository.findById(invalidId)).thenReturn(Optional.ofNullable(any(Book.class)));
+
+        assertThrows(BookNotFoundException.class, () -> bookService.findById(invalidId));
     }
 }
