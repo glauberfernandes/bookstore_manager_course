@@ -3,6 +3,7 @@ package br.com.gftecnologia.bookstoremanager.service;
 import br.com.gftecnologia.bookstoremanager.dto.BookDTO;
 import br.com.gftecnologia.bookstoremanager.dto.MessageResponseDTO;
 import br.com.gftecnologia.bookstoremanager.entity.Book;
+import br.com.gftecnologia.bookstoremanager.exception.BookNotFoundException;
 import br.com.gftecnologia.bookstoremanager.mapper.BookMapper;
 import br.com.gftecnologia.bookstoremanager.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ public class BookService {
         this.bookRepository = bookRepository;
     }
 
-    public MessageResponseDTO create(BookDTO bookDTO){
+    public MessageResponseDTO create(BookDTO bookDTO) {
         Book bookToSave = bookMapper.toModel(bookDTO);
 
         Book savedBook = bookRepository.save(bookToSave);
@@ -32,8 +33,9 @@ public class BookService {
                 .build();
     }
 
-    public BookDTO findById(Long id) {
-        Optional<Book> optionalBook = bookRepository.findById(id);
-        return bookMapper.toDTO(optionalBook.get());
+    public BookDTO findById(Long id) throws BookNotFoundException {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new BookNotFoundException(id));
+        return bookMapper.toDTO(book);
     }
 }
